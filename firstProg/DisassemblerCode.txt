@@ -1,0 +1,352 @@
+   
+====================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+=> 0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+====================================================================
+
+
+=> 0x0804918c <+38>:    sub    esp,0xc
+
+> Subtract 0xC from esp pointer
+> ESP register has 0xffffc990 - 0xc => 0xffffc984
+> Stack pointer (esp) now points to 0xffffc984
+> Allocates 0xc (12 bytes) of data on the stack
+> It does this because of System V i386 ABI memory alignment
+  > When the call is executed further down, we must be at a 16-byte alignment
+  > This leaves the stack pointer at 0xffffc984 which is 4 bytes shy of 16-byte alignment (always ends in 0)
+    > 16 in decimal is 0x10 in hex
+  > So then, when the push happens next, this subtracts another 4 bytes for the memory address stored in eax
+  > This leaves us at a 16-byte alignment
+
+====================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+=> 0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+====================================================================
+
+> Load effective address (LEA) move address directly from source to destination
+> EAX <- EBX-0x1fec
+> Now the question is, what is in the EBX-0x1fex memory space?
+> Use 'x/xw $ebx-0x1fec' to get the word (4 bytes) in hex at this memory address 
+  > 0x804a008:      0x6c6c6548
+  > Similar to the text, we see what appears to be ascii characters
+> Using 'x/6xb $ebx-0x1fec' outputs 
+  > 0x804a008:      0x48    0x65    0x6c    0x6c    0x6f    0x2c
+
+> Using an ascii table representation 'x/6cb' where c is ascii representation rather than hex which outputs
+  > 0x804a008:      72 'H'  101 'e' 108 'l' 108 'l' 111 'o' 44 ','
+
+> So this analysis shows that we are putting the memory address of the string literal "Hello, world!\n" into the eax accumalator register
+ 
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+=> 0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> This pushes the memory address of EAX 
+> Checking the eax register with x/s $eax the output is:
+  > 0x804a008:      "Hello, world!"
+> Push subtracts from the esp register (by 4 bytes)
+> Then it copies the memory address stored in eax to this pointer
+
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+=> 0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> Next the call to the puts command (which replaced printf in my implementation)
+> Must be 16-byte aligned here (esp register), which we are
+> Call does the following:
+  > Pushes the next memory address of the next instruction (0x804919b) onto the top of the stack
+  > Jumps to the target address ($0x8049040) where puts is defined
+    > The PLT (Procedure Linkage Table) then
+      > Resolves the address of puts in the C library (libc)
+      > Transfers execution to it
+> We should see the output now on the screen
+> After the ret instruction in the puts function pops the return address off of the stack back into $eip
+  > We end up at 0x0804919b
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+=> 0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> After the scope has ended (end of the for loop) we need to clean up stack memory
+> The memory declared for the iteration was the 12-byte for alignment + 4-byte LEA (load effective address)
+  > If you notice this 0x10 is 16-bytes, the stack grows downward which is why we subtracted with sub (push subtracts by 4)
+> Adding to the esp register indicates reclaiming memory
+
+(gdb) x/xw $esp
+0xffffc980:     0x0804a008
+(gdb) nexti
+5         for (i=0; i < 10; i++) {
+(gdb) x/xw $esp
+0xffffc990:     0xffffffff
+
+> This shows that 10 bytes of memory on the esp were properly added
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+=> 0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> At the top of the for loop we have a defined i++ in the c code
+> This assembly add is adding the 1 to the variable i stored at [ebp-0xc]
+
+(gdb) x/xw $ebp-0xc
+0xffffc99c:     0x00000000
+(gdb) nexti
+0x080491a2      5         for (i=0; i < 10; i++) {
+(gdb) x/xw $ebp-0xc
+0xffffc99c:     0x00000001
+
+> This shows that 1 was added to this memory location
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+=> 0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> This is comparing the value of i to 0x9 and storing the result in EFLAGS as a temporary value
+> Subtracts 9 from i (i-9 = EFLAGS)
+> If the result is 0 or positive is what the next command is looking for
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+   0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+=> 0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> Since the value in EFLAGS is negative, the jle will pass and jump to the specified region of memory
+
+========================================================================
+   0x08049166 <+0>:     lea    ecx,[esp+0x4]
+   0x0804916a <+4>:     and    esp,0xfffffff0
+   0x0804916d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049170 <+10>:    push   ebp
+   0x08049171 <+11>:    mov    ebp,esp
+   0x08049173 <+13>:    push   ebx
+   0x08049174 <+14>:    push   ecx
+   0x08049175 <+15>:    sub    esp,0x10
+   0x08049178 <+18>:    call   0x80490a0 <__x86.get_pc_thunk.bx>
+   0x0804917d <+23>:    add    ebx,0x2e77
+   0x08049183 <+29>:    mov    DWORD PTR [ebp-0xc],0x0
+   0x0804918a <+36>:    jmp    0x80491a2 <main+60>
+=> 0x0804918c <+38>:    sub    esp,0xc
+   0x0804918f <+41>:    lea    eax,[ebx-0x1fec]
+   0x08049195 <+47>:    push   eax
+   0x08049196 <+48>:    call   0x8049040 <puts@plt>
+   0x0804919b <+53>:    add    esp,0x10
+   0x0804919e <+56>:    add    DWORD PTR [ebp-0xc],0x1
+   0x080491a2 <+60>:    cmp    DWORD PTR [ebp-0xc],0x9
+   0x080491a6 <+64>:    jle    0x804918c <main+38>
+   0x080491a8 <+66>:    mov    eax,0x0
+   0x080491ad <+71>:    lea    esp,[ebp-0x8]
+   0x080491b0 <+74>:    pop    ecx
+   0x080491b1 <+75>:    pop    ebx
+   0x080491b2 <+76>:    pop    ebp
+   0x080491b3 <+77>:    lea    esp,[ecx-0x4]
+   0x080491b6 <+80>:    ret
+========================================================================
+
+> And sure enough we jump there and repeat the loop
+> This happens 10 total times

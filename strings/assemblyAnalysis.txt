@@ -1,0 +1,83 @@
+   
+====================================================================
+   0x08049176 <+0>:     lea    ecx,[esp+0x4]
+   0x0804917a <+4>:     and    esp,0xfffffff0
+   0x0804917d <+7>:     push   DWORD PTR [ecx-0x4]
+   0x08049180 <+10>:    push   ebp
+   0x08049181 <+11>:    mov    ebp,esp
+   0x08049183 <+13>:    push   ebx
+   0x08049184 <+14>:    push   ecx
+   0x08049185 <+15>:    sub    esp,0x20
+   0x08049188 <+18>:    call   0x80491ec <__x86.get_pc_thunk.dx>
+   0x0804918d <+23>:    add    edx,0x2e67
+   0x08049193 <+29>:    mov    eax,gs:0x14
+   0x08049199 <+35>:    mov    DWORD PTR [ebp-0xc],eax
+   0x0804919c <+38>:    xor    eax,eax
+=> 0x0804919e <+40>:    lea    eax,[ebp-0x20]
+   0x080491a1 <+43>:    mov    DWORD PTR [eax],0x6c6c6548
+   0x080491a7 <+49>:    mov    DWORD PTR [eax+0x4],0x77202c6f
+   0x080491ae <+56>:    mov    DWORD PTR [eax+0x8],0x646c726f
+   0x080491b5 <+63>:    mov    WORD PTR [eax+0xc],0x21
+   0x080491bb <+69>:    sub    esp,0xc
+   0x080491be <+72>:    lea    eax,[ebp-0x20]
+   0x080491c1 <+75>:    push   eax
+   0x080491c2 <+76>:    mov    ebx,edx
+   0x080491c4 <+78>:    call   0x8049040 <printf@plt>
+   0x080491c9 <+83>:    add    esp,0x10
+   0x080491cc <+86>:    mov    eax,0x0
+   0x080491d1 <+91>:    mov    edx,DWORD PTR [ebp-0xc]
+   0x080491d4 <+94>:    sub    edx,DWORD PTR gs:0x14
+   0x080491db <+101>:   je     0x80491e2 <main+108>
+   0x080491dd <+103>:   call   0x80491f0 <__stack_chk_fail_local>
+   0x080491e2 <+108>:   lea    esp,[ebp-0x8]
+   0x080491e5 <+111>:   pop    ecx
+   0x080491e6 <+112>:   pop    ebx
+   0x080491e7 <+113>:   pop    ebp
+   0x080491e8 <+114>:   lea    esp,[ecx-0x4]
+====================================================================
+
+=> 0x0804919e <+40>:    lea    eax,[ebp-0x20]
+
+> ebp-0x20 is the memory address of str_a
+
+====================================================================
+
+0x080491a1 <+43>:    mov    DWORD PTR [eax],0x6c6c6548
+0x080491a7 <+49>:    mov    DWORD PTR [eax+0x4],0x77202c6f
+0x080491ae <+56>:    mov    DWORD PTR [eax+0x8],0x646c726f
+0x080491b5 <+63>:    mov    WORD PTR [eax+0xc],0x21
+
+> These are moving the string literal value "Hello, world!" into the accumalator register
+
+====================================================================
+
+0x080491bb <+69>:    sub    esp,0xc
+
+> Declare 12-bytes of spacing
+
+====================================================================
+
+0x080491be <+72>:    lea    eax,[ebp-0x20]
+
+> Move string pointer into accumalator register
+
+====================================================================
+
+0x080491c1 <+75>:    push   eax
+
+> Push the pointer onto the stack
+
+====================================================================
+
+0x08049188 <+18>:    call   0x80491ec <__x86.get_pc_thunk.dx>
+0x0804918d <+23>:    add    edx,0x2e67
+....
+....
+0x080491c2 <+76>:    mov    ebx,edx
+
+> Moves the Global Offset Table (GOT) base address into ebx before print call
+  > Required for locating dynamic symbols in PIE (position independent executable)
+  > The call adds PC (program counter, $eip) address into edx
+  > The add then calculates the GOT from the PC ($eip)
+
+====================================================================

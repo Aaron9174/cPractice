@@ -1,0 +1,35 @@
+   
+====================================================================
+   0x080491a0 <+0>:     lea    ecx,[esp+0x4]
+   0x080491a4 <+4>:     and    esp,0xfffffff0
+   0x080491a7 <+7>:     push   DWORD PTR [ecx-0x4]
+   0x080491aa <+10>:    push   ebp
+   0x080491ab <+11>:    mov    ebp,esp
+   0x080491ad <+13>:    push   ecx
+   0x080491ae <+14>:    sub    esp,0x4
+   0x080491b1 <+17>:    call   0x80491d8 <__x86.get_pc_thunk.ax>
+   0x080491b6 <+22>:    add    eax,0x2e3e
+   0x080491bb <+27>:    push   0x4
+   0x080491bd <+29>:    push   0x3
+   0x080491bf <+31>:    push   0x2
+   0x080491c1 <+33>:    push   0x1
+   0x080491c3 <+35>:    call   0x8049166 <test_function>
+   0x080491c8 <+40>:    add    esp,0x10
+   0x080491cb <+43>:    mov    eax,0x0
+   0x080491d0 <+48>:    mov    ecx,DWORD PTR [ebp-0x4]
+   0x080491d3 <+51>:    leave
+   0x080491d4 <+52>:    lea    esp,[ecx-0x4]
+   0x080491d7 <+55>:    ret
+====================================================================
+
+====================================================================
+0x080491a0 <+0>:     lea    ecx,[esp+0x4]
+
+> Stores the original stack pointer (of the main stack frame) into the ecx register
+====================================================================
+
+0x080491a4 <+4>:     and    esp,0xfffffff0
+
+> Clears out the esp register to be a 16-byte boundary
+  > The least sig hex value will be zero, which is always a 16-byte boundary
+
