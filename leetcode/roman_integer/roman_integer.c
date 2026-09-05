@@ -60,6 +60,58 @@ void printResult(char *s, int convertedNum) {
   printf("Converted %s to %d\n", s, convertedNum);
 }
 
+struct RomanTransitions {
+  char curRn;
+  char *possibleTransitionRn;
+};
+const struct RomanTransitions rnTransitions[3] = {
+    {'I', "IVX"}, {'X', "XLC"}, {'C', "CDM"}};
+
+unsigned int calculateTransitionSum(char *s, unsigned int *index) {
+  char currRn = s[*index];
+  unsigned int accum = 0;
+  unsigned int rnStepAmnt;
+  char possiblePositiveRn;
+  char possibleSubtractionRn;
+  char possibleSubtractionRn2;
+
+  if (currRn == rnTransitions[0].curRn) {
+    rnStepAmnt = 1;
+    possiblePositiveRn = rnTransitions[0].possibleTransitionRn[0];
+  } else if (currRn == rnTransitions[1].curRn) {
+    rnStepAmnt = 10;
+    possibleSubtractionRn = rnTransitions[0].possibleTransitionRn[1];
+  } else {
+    rnStepAmnt = 100;
+    possibleSubtractionRn2 = rnTransitions[0].possibleTransitionRn[2];
+  }
+
+  accum = rnStepAmnt;
+
+  while (*index < *index + (MAX_REPEAT_ROMAN_CHAR_LEN - 1)) {
+    char nextRn = s[*index + 1];
+
+    if (nextRn == possiblePositiveRn) {
+      accum += rnStepAmnt;
+      *index += 1;
+    } else if (nextRn == possibleSubtractionRn) {
+      accum += 3 * rnStepAmnt;
+      *index += 1;
+      break;
+    } else if (nextRn == possibleSubtractionRn2) {
+      accum += 8 * rnStepAmnt;
+      *index += 1;
+      break;
+    } else {
+      // printf("Failed to parse value: s[%d] = %c\n at line %d\n", i, s[i],
+      //        __LINE__);
+      break;
+    }
+  }
+
+  return accum;
+}
+
 unsigned int convertI(char *s, unsigned int *index) {
   char iRn = s[*index];
   unsigned int accum = 1;
@@ -149,16 +201,12 @@ int romanToInt(char *s) {
   unsigned int temp = 0;
   for (unsigned int i = 0; i < strlen(s); i++) {
     char rn = s[i];
-    if (rn == 'I') {
-      sum += convertI(s, &i);
+    if (rn == 'I' || rn == 'X' || rn == 'C') {
+      sum += calculateTransitionSum(s, &i);
     } else if (rn == 'V') {
       sum += 5;
-    } else if (rn == 'X') {
-      sum += convertX(s, &i);
     } else if (rn == 'L') {
       sum += 50;
-    } else if (rn == 'C') {
-      sum += convertC(s, &i);
     } else if (rn == 'D') {
       sum += 500;
     } else if (rn == 'M') {
