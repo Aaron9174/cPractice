@@ -44,6 +44,8 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
+typedef enum { OK = 0, FAILED_MEMORY_ALLOC = 1 } HmStatus;
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -51,7 +53,9 @@
 typedef struct HashMap HashMap;
 
 // Allocation & Lifecycle
-HashMap *hashmap_create(size_t initial_capacity);
+HmStatus hashmap_create(size_t initial_capacity, HashMap *hashmap);
+HmStatus hashmap_allocate_buckets(size_t initial_capacity,
+                                  struct HashBucket *buckets);
 void hashmap_destroy(HashMap *map);
 
 // Core Mutations & Accessors
