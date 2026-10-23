@@ -154,12 +154,7 @@ static void test_zero_capacity(void) {
   printf("zero_capacity (R7)\n");
   struct HashMap *map = NULL;
   HmStatus result = hashmap_create(0, &map);
-  CHECK(map != NULL && result == OK);
-
-  CHECK(hashmap_put(map, "x", 5));
-  int out = 0;
-  CHECK(hashmap_get(map, "x", &out) && out == 5);
-  hashmap_destroy(map);
+  CHECK(map == NULL && result == INVALID_LENGTH_PARAMETER);
 }
 
 static void test_empty_string_key(void) {

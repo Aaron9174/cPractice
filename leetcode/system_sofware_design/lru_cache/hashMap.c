@@ -6,19 +6,29 @@
 #include <string.h>
 
 #define FNV_OFFSET_BASIS 14695981039346656037ULL
-#define FNV_PRIME 1099511628211
+#define FNV_PRIME 1099511628211ULL
 
 HmStatus hashmap_create(size_t initial_capacity, struct HashMap **hashmap) {
   HmStatus status = OK;
 
-  *hashmap = calloc(1, sizeof(struct HashMap));
-  if (*hashmap == NULL) {
-    status = FAILED_MEMORY_ALLOC;
+  if (initial_capacity == 0) {
+    status = INVALID_LENGTH_PARAMETER;
   }
 
-  (*hashmap)->capacity = initial_capacity;
   if (!status) {
+    *hashmap = calloc(1, sizeof(struct HashMap));
+    if (*hashmap == NULL) {
+      status = FAILED_MEMORY_ALLOC;
+    }
+  }
+
+  if (!status) {
+    (*hashmap)->capacity = initial_capacity;
     status = hashmap_allocate_buckets(initial_capacity, &((*hashmap)->buckets));
+    if (status) {
+      free(*hashmap);
+      *hashmap = NULL;
+    }
   }
 
   return status;
@@ -59,22 +69,12 @@ bool hashmap_remove(struct HashMap *map, const char *key) {
   return false;
 }
 
-/**
- *
-algorithm fnv-1a is
-    hash := FNV_offset_basis
-
-    for each byte_of_data to be hashed do
-        hash := hash XOR byte_of_data
-        hash := hash × FNV_prime
-
-    return hash
- */
 uint64_t createFNV1aHash(const char *key) {
   uint64_t hash = FNV_OFFSET_BASIS;
 
-  for (uint32_t i = 0; i < strlen(key); i++) {
-    uint8_t dataByte = *(key + i * sizeof(uint8_t));
+  const size_t byteLen = strlen(key);
+  for (size_t i = 0; i < byteLen; i++) {
+    uint8_t dataByte = key[i];
     hash ^= dataByte;
     hash *= FNV_PRIME;
   }

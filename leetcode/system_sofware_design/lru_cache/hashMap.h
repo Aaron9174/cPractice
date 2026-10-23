@@ -45,7 +45,11 @@
 #define HASHMAP_H
 
 #include <stdint.h>
-typedef enum { OK = 0, FAILED_MEMORY_ALLOC = 1 } HmStatus;
+typedef enum {
+  OK = 0,
+  FAILED_MEMORY_ALLOC = 1,
+  INVALID_LENGTH_PARAMETER = 2,
+} HmStatus;
 
 #include <stdbool.h>
 #include <stddef.h>
