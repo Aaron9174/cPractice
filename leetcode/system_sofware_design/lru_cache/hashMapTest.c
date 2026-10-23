@@ -21,8 +21,10 @@ static int failures = 0;
 
 static void test_create_empty(void) {
   printf("create_empty\n");
-  HashMap *map = hashmap_create(8);
-  CHECK(map != NULL);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   CHECK(hashmap_size(map) == 0);
   int out = 0;
   CHECK(!hashmap_get(map, "missing", &out));
@@ -31,7 +33,10 @@ static void test_create_empty(void) {
 
 static void test_put_get(void) {
   printf("put_get (R4, R5)\n");
-  HashMap *map = hashmap_create(8);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   CHECK(hashmap_put(map, "one", 1));
   CHECK(hashmap_put(map, "two", 2));
   int out = 0;
@@ -48,7 +53,10 @@ static void test_put_get(void) {
 
 static void test_overwrite(void) {
   printf("overwrite (R4)\n");
-  HashMap *map = hashmap_create(8);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   hashmap_put(map, "k", 1);
   hashmap_put(map, "k", 99);
   int out = 0;
@@ -59,7 +67,10 @@ static void test_overwrite(void) {
 
 static void test_key_copy(void) {
   printf("key_copy (R3)\n");
-  HashMap *map = hashmap_create(8);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   char buf[16];
   strcpy(buf, "alpha");
   hashmap_put(map, buf, 7);
@@ -72,7 +83,10 @@ static void test_key_copy(void) {
 
 static void test_remove(void) {
   printf("remove (R6)\n");
-  HashMap *map = hashmap_create(8);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   hashmap_put(map, "a", 1);
   hashmap_put(map, "b", 2);
   CHECK(hashmap_remove(map, "a"));
@@ -91,7 +105,10 @@ static void test_remove(void) {
 static void test_collisions_and_resize(void) {
   printf("collisions_and_resize (R2, R7)\n");
   // Tiny capacity forces collisions and several resizes
-  HashMap *map = hashmap_create(1);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(1, &map);
+  CHECK(map != NULL && result == OK);
+
   char key[32];
   const int n = 10000;
   int bad = 0;
@@ -135,8 +152,10 @@ static void test_collisions_and_resize(void) {
 
 static void test_zero_capacity(void) {
   printf("zero_capacity (R7)\n");
-  HashMap *map = hashmap_create(0);
-  CHECK(map != NULL);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(0, &map);
+  CHECK(map != NULL && result == OK);
+
   CHECK(hashmap_put(map, "x", 5));
   int out = 0;
   CHECK(hashmap_get(map, "x", &out) && out == 5);
@@ -145,7 +164,10 @@ static void test_zero_capacity(void) {
 
 static void test_empty_string_key(void) {
   printf("empty_string_key\n");
-  HashMap *map = hashmap_create(8);
+  struct HashMap *map = NULL;
+  HmStatus result = hashmap_create(8, &map);
+  CHECK(map != NULL && result == OK);
+
   CHECK(hashmap_put(map, "", 11));
   int out = 0;
   CHECK(hashmap_get(map, "", &out) && out == 11);

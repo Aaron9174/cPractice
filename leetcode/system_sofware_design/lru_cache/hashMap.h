@@ -44,26 +44,42 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
+#include <stdint.h>
 typedef enum { OK = 0, FAILED_MEMORY_ALLOC = 1 } HmStatus;
 
 #include <stdbool.h>
 #include <stddef.h>
 
-// Opaque type: the struct is defined in hashMap.c
-typedef struct HashMap HashMap;
+struct HashEntry {
+  struct HashEntry *prev;
+  struct HashEntry *next;
+};
+
+struct HashBucket {
+  struct HashEntry *head;
+};
+
+struct HashMap {
+  size_t size;
+  size_t capacity;
+  struct HashBucket *buckets;
+};
 
 // Allocation & Lifecycle
-HmStatus hashmap_create(size_t initial_capacity, HashMap *hashmap);
+HmStatus hashmap_create(size_t initial_capacity, struct HashMap **hashmap);
 HmStatus hashmap_allocate_buckets(size_t initial_capacity,
-                                  struct HashBucket *buckets);
-void hashmap_destroy(HashMap *map);
+                                  struct HashBucket **buckets);
+void hashmap_destroy(struct HashMap *map);
 
 // Core Mutations & Accessors
-bool hashmap_put(HashMap *map, const char *key, int value);
-bool hashmap_get(HashMap *map, const char *key, int *out_value);
-bool hashmap_remove(HashMap *map, const char *key);
+bool hashmap_put(struct HashMap *map, const char *key, int value);
+bool hashmap_get(struct HashMap *map, const char *key, int *out_value);
+bool hashmap_remove(struct HashMap *map, const char *key);
+
+// Helper functions
+uint64_t createFNV1aHash(const char *key);
 
 // State Inspection
-size_t hashmap_size(const HashMap *map);
+size_t hashmap_size(const struct HashMap *map);
 
 #endif // HASHMAP_H
